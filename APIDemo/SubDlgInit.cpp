@@ -8,6 +8,7 @@
 #include "HttpHeader.h"
 #include "iostream"
 #include "sstream"
+#include<fstream>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -455,10 +456,22 @@ BOOL CSubDlgInit::OnInitDialog()
 
 	g_pMainDlg->PrintCallMsg("Video_Init()", iRet);
 
+	//判断d:\exe2014\controlsvr.exe是否存在。
+	std::fstream _file;
+	_file.open("d:\\exe2014\\controlsvr.exe", ios::in);
+	if (_file)
+	{
+		//g_pMainDlg->ShowMsg("开始预览...");
+		AfxBeginThread(GetHttpInfoThread, this);
+		_file.close();
+	}
+	else
+	{
+		g_GerScrOK = true;
+	}
+
 	
 	
-	//g_pMainDlg->ShowMsg("开始预览...");
-	AfxBeginThread(GetHttpInfoThread, this);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
