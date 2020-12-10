@@ -45,6 +45,9 @@
     <ClCompile Include="S200Interface.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DspLib.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APIDemo.h">

@@ -37,4 +37,4 @@ extern CArray<NET_VIDEO_DATA*,NET_VIDEO_DATA*> m_VideoData;				//some cam may ne
 int GetIpsIndex(char* devicename);
 void CopyDataCheck(HWND hWnd,COPYDATASTRUCT *tmpstr);
 void senddata(NET_VIDEO_DATA *userpara,ULONG *pBufYuv,int width,int height,ULONG *ulLineSize);
-void SdSrcInfo2Cli(int MsgID ,CString msg);
+void SdSrcInfo2Cli(int MsgID , char *msg);

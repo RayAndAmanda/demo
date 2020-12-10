@@ -225,6 +225,7 @@
   <ItemGroup>
     <ClCompile Include="APIDemo.cpp" />
     <ClCompile Include="APIDemoDlg.cpp" />
+    <ClCompile Include="DspLib.cpp" />
     <ClCompile Include="MyMsg.cpp" />
     <ClCompile Include="MyShowMsg.cpp" />
     <ClCompile Include="S200Interface.cpp" />

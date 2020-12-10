@@ -8,12 +8,12 @@
 
 using namespace std; 
 
-#ifdef _DEBUG
-#pragma   comment   (lib,   "DspLibd.lib")  
-
-#else
-#pragma   comment   (lib,   "DspLib.lib")  
-#endif
+//#ifdef _DEBUG
+//#pragma   comment   (lib,   "DspLibd.lib")  
+//
+//#else
+//#pragma   comment   (lib,   "DspLib.lib")  
+//#endif
 
 #define  S200INTERFACE
 #define SAFE_DELETE(obj)		if(obj){delete obj; obj = NULL;}
@@ -163,14 +163,25 @@ void CALLBACK DecodedDataCallback1(VIDEO_INT64 i64PlayHandle, const char* pDataA
 // iFrameType：图像YUV类型（目前为YV12，值为3）
 // iTimeStamp：时间戳
 // pUserData：用户数据
-	printf("enter DecodedDataCallback1\n");
-	NET_VIDEO_DATA *sinChan = (NET_VIDEO_DATA *)(pUserData);
-	ULONG pYuvBuf[4];
+	printf("enter DecodedDataCallback\n");
+	printf("iDataLen:%d,iWidth:%d,iHeight:%d,iFrameType:%d,iTimeStamp:%d", iDataLen, iWidth, iHeight, iFrameType, iTimeStamp);
+	try
+	{
+		NET_VIDEO_DATA *sinChan = (NET_VIDEO_DATA *)(pUserData);
+		ULONG pYuvBuf[4];
+
+		pYuvBuf[0] = (ULONG)pDataArray;
+		pYuvBuf[1] = (ULONG)(pDataArray + iWidth*iHeight);
+		pYuvBuf[2] = (ULONG)(pDataArray + (iWidth / 2)*(iHeight / 2) + iWidth*iHeight);
+		
+		senddata(sinChan, pYuvBuf, iWidth, iHeight, NULL);
+	}
+	catch (...)
+	{
+		printf("senddata data error");
+	}
 	
-	pYuvBuf[0] = (ULONG)pDataArray;
-	pYuvBuf[1] = (ULONG)(pDataArray+ iWidth*iHeight);
-	pYuvBuf[2] = (ULONG)(pDataArray + (iWidth/2)*(iHeight/2)+ iWidth*iHeight);
-	senddata(sinChan, pYuvBuf, iWidth, iHeight, NULL);
+	printf("end DecodedDataCallback1\n");
 }
 void CALLBACK MsgCallBack1(VIDEO_INT64 i64PlayHandle, int iMsg, void* pUserData)
 {
@@ -199,6 +210,7 @@ BOOL StartRealPlayS200(const char* path, void* netid)
 	}*/
 	Url = FindPreviewUrlByCameraindex(cameraIndex);
 	printf("this camera url is:%s\n", Url.c_str());
+
 	USERDATA stUserData;
 	stUserData.ctype = RealPlay;
 	strcpy_s(stUserData.msg, AnsiToUtf8("实时").c_str());
@@ -206,8 +218,8 @@ BOOL StartRealPlayS200(const char* path, void* netid)
 	stReq.fnStream = StreamCallBack1;
 	stReq.fnDecodedStream = DecodedDataCallback1;
 	stReq.fnMsg = MsgCallBack1;
-	stReq.pUserData = (void*)&stUserData;  //20201210宾馆检查出来的
-	//stReq.pUserData = (void*)netid; //20201210宾馆检查出来的
+	//stReq.pUserData = (void*)&stUserData;  //20201210宾馆检查出来的
+	stReq.pUserData = (void*)netid; //20201210宾馆检查出来的
 	stReq.iHardWareDecode = 0;
 	int PlayHandle = Video_StartPreview(Url.c_str(),
 			NULL,
@@ -219,14 +231,17 @@ BOOL StartRealPlayS200(const char* path, void* netid)
 		if (pnet)
 		{
 			OWN_PARA* ownp = (OWN_PARA*)pnet->ownpara;
-			if (ownp)
+			/*if (ownp)
 			{
 				ownp = (OWN_PARA*)malloc(sizeof(OWN_PARA));
 
 				ownp->seq = PlayHandle;
 				pnet->ownpara = ownp;
 
-			}
+			}*/
+			
+			ownp->seq = PlayHandle;
+			pnet->ownpara = ownp;
 		}
 	}
 
