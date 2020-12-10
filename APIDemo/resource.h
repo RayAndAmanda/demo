@@ -45,6 +45,7 @@
 #define IDC_BUTTON_                     1030
 #define IDC_BUTTON_SPEEDPLAY            1030
 #define IDC_BUTTON_PRESETR              1031
+#define IDC_BUTTON1                     1031
 #define IDC_BUTTON35                    1032
 #define IDC_BUTTON_PRESETLD             1033
 #define IDC_BUTTON36                    1034
@@ -209,7 +210,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        129
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1031
+#define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

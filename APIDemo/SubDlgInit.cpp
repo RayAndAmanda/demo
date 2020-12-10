@@ -183,6 +183,7 @@ BEGIN_MESSAGE_MAP(CSubDlgInit, CDialog)
 	//}}AFX_MSG_MAP
 	ON_WM_COPYDATA()
 	
+	ON_BN_CLICKED(IDC_BUTTON1, &CSubDlgInit::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -324,7 +325,7 @@ void DecodeDeviceGroupJson(std::string &strGroups,int& totalGroup)
 }
 UINT GetHttpInfoThread(LPVOID lparam)
 {
-	CString UserInfo_path(".\\UserInfo.ini");
+	/*CString UserInfo_path(".\\UserInfo.ini");
 
 	
 	
@@ -338,8 +339,8 @@ UINT GetHttpInfoThread(LPVOID lparam)
 	myQuery.artemisPort = GetPrivateProfileInt("UserInfo", "artemisPort", 0, UserInfo_path);
 	myQuery.appKey = key;
 	myQuery.appSecret = secret;
-	myQuery.artemisIp = artIP;
-	
+	myQuery.artemisIp = artIP;*/
+	//20201210 这里有问题如果不启动线程就不能初始化
 	///获取所有树编码
 
 	std::string strTrees = getAllTreeCode(myQuery);
@@ -378,15 +379,18 @@ UINT GetHttpInfoThread(LPVOID lparam)
 			goto L2;
 		}
 	}
+	CString camera_size;
+	camera_size.Format("all camera size:%d", g_CameraInfoList.size());
 	
-
-	for (std::vector<CameraInfo>::iterator it = g_CameraInfoList.begin();
-		it != g_CameraInfoList.end();
-		++it)
-	{//根据监控点编号获取视频预览url
-		std::string strUrl = FindPreviewUrlByIndexcode(myQuery, *it);
-		DecodeUrlJson(strUrl, *it);
-	}
+	g_pMainDlg->ShowMsg(camera_size);
+	//这里不用获取全部url,节省时间
+	//for (std::vector<CameraInfo>::iterator it = g_CameraInfoList.begin();
+	//	it != g_CameraInfoList.end();
+	//	++it)
+	//{//根据监控点编号获取视频预览url
+	//	std::string strUrl = FindPreviewUrlByIndexcode(myQuery, *it);
+	//	DecodeUrlJson(strUrl, *it);
+	//}
 
 	//test send
 	/*
@@ -455,7 +459,18 @@ BOOL CSubDlgInit::OnInitDialog()
 	}
 
 	g_pMainDlg->PrintCallMsg("Video_Init()", iRet);
-
+	CString UserInfo_path(".\\UserInfo.ini");
+	char key[256] = { 0 };
+	char secret[256] = { 0 };
+	char artIP[256] = { 0 };
+	char artPort[256] = { 0 };
+	GetPrivateProfileString("UserInfo", "appKey", "", key, 256, UserInfo_path);
+	GetPrivateProfileString("UserInfo", "appSecret", "", secret, 256, UserInfo_path);
+	GetPrivateProfileString("UserInfo", "artemisIp", "", artIP, 256, UserInfo_path);
+	myQuery.artemisPort = GetPrivateProfileInt("UserInfo", "artemisPort", 0, UserInfo_path);
+	myQuery.appKey = key;
+	myQuery.appSecret = secret;
+	myQuery.artemisIp = artIP;
 	//判断d:\exe2014\controlsvr.exe是否存在。
 	std::fstream _file;
 	_file.open("d:\\exe2014\\controlsvr.exe", ios::in);
@@ -503,3 +518,18 @@ BOOL CSubDlgInit::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 }
 
 
+
+
+void CSubDlgInit::OnBnClickedButton1()
+{
+
+	// TODO: 在此添加控件通知处理程序代码
+	CString csUrl;
+	GetDlgItemText(IDC_EDIT1, csUrl);
+	string Url = FindPreviewUrlByCameraindex(csUrl.GetString());
+	printf("this camera url is:%s\n", Url.c_str());
+	csUrl = "this camera url is:";
+	csUrl += Url.c_str();
+	g_pMainDlg->ShowMsg(csUrl);
+
+}

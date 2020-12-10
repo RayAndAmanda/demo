@@ -206,8 +206,8 @@ BOOL StartRealPlayS200(const char* path, void* netid)
 	stReq.fnStream = StreamCallBack1;
 	stReq.fnDecodedStream = DecodedDataCallback1;
 	stReq.fnMsg = MsgCallBack1;
-	//stReq.pUserData = (void*)&stUserData;
-	stReq.pUserData = (void*)netid;
+	stReq.pUserData = (void*)&stUserData;  //20201210宾馆检查出来的
+	//stReq.pUserData = (void*)netid; //20201210宾馆检查出来的
 	stReq.iHardWareDecode = 0;
 	int PlayHandle = Video_StartPreview(Url.c_str(),
 			NULL,

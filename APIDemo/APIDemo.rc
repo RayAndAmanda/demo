@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 中文(中华人民共和国) resources
+// 中文(简体，中国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 #pragma code_page(936)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -68,12 +66,13 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\APIDemo.ico"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG  0, 0, 235, 55
+IDD_ABOUTBOX DIALOG 0, 0, 235, 55
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "关于 APIDemo"
 FONT 9, "宋体"
@@ -106,6 +105,8 @@ BEGIN
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,15,74,296,1
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,15,20,296,1
     LTEXT           "初始化/反初始化API",IDC_STATIC,15,10,113,8
+    PUSHBUTTON      "获取url",IDC_BUTTON1,49,102,34,12
+    EDITTEXT        IDC_EDIT1,99,100,164,16,ES_AUTOHSCROLL
 END
 
 IDD_DLG_SUB_REAL DIALOGEX 0, 0, 332, 375
@@ -305,8 +306,12 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
+    "IDD_ABOUTBOX", DIALOG
+    BEGIN
+    END
+
     IDD_APIDEMO_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -355,7 +360,18 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // 中文(中华人民共和国) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DLG_SUB_INIT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // 中文(简体，中国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
