@@ -127,7 +127,8 @@ std::string FindPreviewUrlByCameraindex(std::string cameraIndexCode)
 	headers.insert(std::make_pair(HttpHeader::HTTP_HEADER_CONTENT_TYPE, "application/json;charset=UTF-8"));
 	list<string> signHeaderPrefixList;
 	char strBody[1024] = { 0 };
-	sprintf_s(strBody, 1024, "{\"cameraIndexCode\":\"%s\"}", cameraIndexCode.c_str());
+	sprintf_s(strBody, 1024, "{\"cameraIndexCode\":\"%s\",\"expand\":\"streamform=ps\" }", cameraIndexCode.c_str());
+	printf("strBody:%s\n", strBody);
 	string res_pos= HttpPost(ss.str(), headers, strBody, myQuery.appKey, myQuery.appSecret, 5, signHeaderPrefixList);
 	return resDecodeUrlJson(res_pos);
 
