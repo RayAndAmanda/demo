@@ -272,14 +272,7 @@ BOOL CAPIDemoDlg::OnInitDialog()
 		FILE_ATTRIBUTE_READONLY,
 		NULL);*/
 	//end
-	//¿ªºÚ´° by ray
-	CString UserInfo_path(".\\UserInfo.ini");
-	int hideWindow = GetPrivateProfileInt("UserInfo", "hidewindow", 0, UserInfo_path);
-	if (!hideWindow) {
-		AllocConsole();
-		freopen("CONOUT$","w+t",stdout);
-		freopen("CONIN$","r+t",stdin);
-	}
+	
 	
 	//
 	return TRUE;  // return TRUE  unless you set the focus to a control

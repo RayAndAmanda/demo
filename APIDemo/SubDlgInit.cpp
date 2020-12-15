@@ -47,7 +47,7 @@ string getAllTreeCode(Unit_query_t query)
 	list<string> signHeaderPrefixList;
 	char strBody[1024] = { 0 };
 	sprintf_s(strBody, 1024, "{}");
-	return HttpPost(ss.str(), headers, strBody, query.appKey, query.appSecret, 5, signHeaderPrefixList);;
+	return HttpPost(ss.str(), headers, strBody, query.appKey, query.appSecret, 50, signHeaderPrefixList);;
 }
 
 ///
@@ -65,8 +65,9 @@ string getCamerasByTreeCode(Unit_query_t query,std::string &treecode,int PageNo,
 	headers.insert(std::make_pair(HttpHeader::HTTP_HEADER_CONTENT_TYPE, "application/json;charset=UTF-8"));
 	list<string> signHeaderPrefixList;
 	char strBody[1024] = { 0 };
+	memset(strBody, 0, 1024);
 	sprintf_s(strBody, 1024, "{\"pageNo\":%d,\"pageSize\":%d,\"treeCode\":\"%s\"}", PageNo, PageSize,treecode.c_str());
-	return HttpPost(ss.str(), headers, strBody, query.appKey, query.appSecret, 5, signHeaderPrefixList);
+	return HttpPost(ss.str(), headers, strBody, query.appKey, query.appSecret, 50, signHeaderPrefixList);
 
 }
 /********************************************/
@@ -83,8 +84,9 @@ string getDeviceGroupListByTreeCode(Unit_query_t query, std::string &treecode, i
 	headers.insert(std::make_pair(HttpHeader::HTTP_HEADER_CONTENT_TYPE, "application/json;charset=UTF-8"));
 	list<string> signHeaderPrefixList;
 	char strBody[1024] = { 0 };
+	memset(strBody, 0, 1024);
 	sprintf_s(strBody, 1024, "{\"pageNo\":%d,\"pageSize\":%d,\"treeCode\":\"%s\"}", PageNo, PageSize, treecode.c_str());
-	return HttpPost(ss.str(), headers, strBody, query.appKey, query.appSecret, 5, signHeaderPrefixList);
+	return HttpPost(ss.str(), headers, strBody, query.appKey, query.appSecret, 50, signHeaderPrefixList);
 }
 /********************************************/
 
@@ -229,6 +231,7 @@ void DecodeTreeJson(std::string &strTrees)
 }
 void DecodeCameraJson(std::string &strCameras,std::string &strTreeCode,int &totalCamera )
 {
+	printf("enter DecodeCameraJson\n\n");
 	/*{
 		"code": "0",
 			"msg" : "success",
@@ -254,18 +257,28 @@ void DecodeCameraJson(std::string &strCameras,std::string &strTreeCode,int &tota
 	{
 		Json::Value &dataObject = value["data"];
 		totalCamera = dataObject["total"].asInt();
+		
 		Json::Value &lists = dataObject["list"];
+		printf("totalCamera:%d, lists.size:%d\n\n", totalCamera, lists.size());
 		for (int i = 0; i < lists.size(); i++)
+		//for (int i = 0; i < totalCamera; i++)
 		{
 			CString temp ;
 
 			Json::Value &list = lists[i];
 			CameraInfo camerainfo;
 			camerainfo.cameraIndexCode = list["cameraIndexCode"].asString();
-			temp = list["cameraTypeName"].asCString();
-			camerainfo.cameraTypeName= Utf8toAnsi(temp.GetBuffer());
-			temp = list["name"].asCString();
-			camerainfo.name = Utf8toAnsi(temp.GetBuffer());
+			
+			
+			/*temp = list["cameraTypeName"].asCString();
+			camerainfo.cameraTypeName= Utf8toAnsi(temp.GetBuffer());*/
+			camerainfo.cameraTypeName = list["cameraTypeName"].asString();
+
+
+			/*temp = list["name"].asCString();
+			camerainfo.name = Utf8toAnsi(temp.GetBuffer());*/
+
+			camerainfo.name = list["name"].asString();
 			camerainfo.cameraType= list["cameraType"].asInt();
 			camerainfo.treeCode = strTreeCode;
 			camerainfo.status= list["status"].asInt();
@@ -273,8 +286,11 @@ void DecodeCameraJson(std::string &strCameras,std::string &strTreeCode,int &tota
 			camerainfo.deviceIndexCode = list["deviceIndexCode"].asString();
 			
 			g_CameraInfoList.push_back(camerainfo);
+			printf("push_back\n\n g_CameraInfoList:%d", g_CameraInfoList.size());
 		}
 	}
+	else { printf("DecodeCameraJson error\n"); }
+	printf("leave DecodeCameraJson\n\n");
 }
 
 
@@ -297,6 +313,10 @@ void DecodeUrlJson(std::string &strUrls,CameraInfo &camerainfo)
 		g_pMainDlg->ShowMsg(CString(camerainfo.name.c_str()));
 		g_pMainDlg->ShowMsg(CString(camerainfo.url.c_str()));
 	}
+	else
+	{
+		printf("DecodeUrlJson error\n");
+	}
 }
 void DecodeDeviceGroupJson(std::string &strGroups,int& totalGroup)
 {
@@ -314,14 +334,18 @@ void DecodeDeviceGroupJson(std::string &strGroups,int& totalGroup)
 			Json::Value &list = lists[i];
 			DeviceGroup devicegroup;
 			devicegroup.indexCode = list["indexCode"].asString();
-			temp = list["name"].asCString();
-			devicegroup.name = Utf8toAnsi(temp.GetBuffer());
-			
+			//temp = list["name"].asCString();
+			//devicegroup.name = Utf8toAnsi(temp.GetBuffer());
+			devicegroup.name = list["name"].asString();
 			devicegroup.treeCode = list["treeCode"].asString();
 			devicegroup.parentIndexCode = list["parentIndexCode"].asString();
 			g_DeviceGroupList.push_back(devicegroup);
 			
 		}
+	}
+	else
+	{
+		printf("DecodeDeviceGroupJson error\n");
 	}
 }
 UINT GetHttpInfoThread(LPVOID lparam)
@@ -343,26 +367,28 @@ UINT GetHttpInfoThread(LPVOID lparam)
 	myQuery.artemisIp = artIP;*/
 	//20201210 这里有问题如果不启动线程就不能初始化
 	///获取所有树编码
-
+	printf("enter GetHttpInfoThread\n");
 	std::string strTrees = getAllTreeCode(myQuery);
 	//test data
 	//std::string strTrees="{\"code\":true,\"data\":{\"total\":2,\"list\":[{\"treeCode\":\"8\",\"treeName\":\"trao\"},{\"treeCode\":\"9\",\"treeName\":\"ray\"},{\"treeCode\":\"12\",\"treeName\":\"alex\"}]}},\"token\":\"000000 - 000\"}";
+	printf("strTrees:%s\n", strTrees.c_str());
 	DecodeTreeJson(strTrees);
 	
-	
+	printf("g_TreeNodeList size:%d\n", g_TreeNodeList.size());
 	for (std::vector<TreeNode>::iterator it = g_TreeNodeList.begin();
 		it != g_TreeNodeList.end();
 		++it)
 	{
 		//根据树编码和分页参数获取所有监控点资源编号
 		int CameraPageNo = 1;
-		const int PageSize = 1000;
+		const int PageSize = 20;
 		int totalCamera = 0;
 		int totalDeviceGroup = 0;
 		int DeviceGroupPageNo = 1;
 	L1:
 		totalCamera = 0;
 		std::string strCameras = getCamerasByTreeCode(myQuery, it->treeCode, CameraPageNo, PageSize);
+		printf("strCameras size:%d,strCameras:%s\n\n", strCameras.size(), strCameras.c_str());
 		DecodeCameraJson(strCameras, it->treeCode, totalCamera);
 		if (CameraPageNo*PageSize < totalCamera)
 		{
@@ -373,6 +399,7 @@ UINT GetHttpInfoThread(LPVOID lparam)
 	L2:
 		totalDeviceGroup = 0;
 		std::string strDeviceGroup = getDeviceGroupListByTreeCode(myQuery, it->treeCode, DeviceGroupPageNo, PageSize);
+		printf("strDeviceGroup:%s\n\n", strDeviceGroup.c_str());
 		DecodeDeviceGroupJson(strDeviceGroup, totalDeviceGroup);
 		if (DeviceGroupPageNo*PageSize < totalDeviceGroup)
 		{
@@ -380,6 +407,7 @@ UINT GetHttpInfoThread(LPVOID lparam)
 			goto L2;
 		}
 	}
+	printf("all camera size:%d", g_CameraInfoList.size());
 	CString camera_size;
 	camera_size.Format("all camera size:%d", g_CameraInfoList.size());
 	
@@ -458,9 +486,16 @@ BOOL CSubDlgInit::OnInitDialog()
 	{
 		isInitialize = FALSE;
 	}
-
-	g_pMainDlg->PrintCallMsg("Video_Init()", iRet);
+	//开黑窗 by ray
 	CString UserInfo_path(".\\UserInfo.ini");
+	int hideWindow = GetPrivateProfileInt("UserInfo", "hidewindow", 0, UserInfo_path);
+	if (!hideWindow) {
+		AllocConsole();
+		freopen("CONOUT$", "w+t", stdout);
+		freopen("CONIN$", "r+t", stdin);
+	}
+	g_pMainDlg->PrintCallMsg("Video_Init()", iRet);
+	//CString UserInfo_path(".\\UserInfo.ini");
 	char key[256] = { 0 };
 	char secret[256] = { 0 };
 	char artIP[256] = { 0 };
@@ -469,9 +504,17 @@ BOOL CSubDlgInit::OnInitDialog()
 	GetPrivateProfileString("UserInfo", "appSecret", "", secret, 256, UserInfo_path);
 	GetPrivateProfileString("UserInfo", "artemisIp", "", artIP, 256, UserInfo_path);
 	myQuery.artemisPort = GetPrivateProfileInt("UserInfo", "artemisPort", 0, UserInfo_path);
+
 	myQuery.appKey = key;
 	myQuery.appSecret = secret;
 	myQuery.artemisIp = artIP;
+
+	////
+	printf("appKey:%s\n\n", myQuery.appKey.c_str());
+	printf("appSecret:%s\n\n", myQuery.appSecret.c_str());
+	printf("artemisIp:%s\n\n", myQuery.artemisIp.c_str());
+	printf("artemisPort:%d\n\n", myQuery.artemisPort);
+	//////
 	//判断d:\exe2014\controlsvr.exe是否存在。
 	std::fstream _file;
 	_file.open("d:\\exe2014\\controlsvr.exe", ios::in);
