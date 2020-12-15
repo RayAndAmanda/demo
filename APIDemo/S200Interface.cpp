@@ -3,9 +3,9 @@
 #include "DspLib.h"
 #include <string>
 #include <vector>
-
+#include<fstream>
 #include "S200Interface.h"
-
+#include<iostream>
 using namespace std; 
 
 //#ifdef _DEBUG
@@ -59,95 +59,147 @@ S200INTERFACE void GetSrcInfo(IPvs &ipvs)
 {
 	printf("enter GerSrcInfo\n");
 	///
-	{//公司测试
-		//string msg1 = "0";
-		//char msg[1024];
-		//char msg2[1024];
-		//msg1 += ",0";
-		//SdSrcInfo2Cli(3, (char*)msg1.c_str()); // 发3 表示发送根节点
-		//sprintf(msg, "%s,%d,%s,%s", "0", \
-		//	1, "分组1", "abc");
-		//SdSrcInfo2Cli(1, msg);					//1 发送分组信息
-		//sprintf(msg2, "%s,%d,%s,%s,%d","abc",1,"Camera_01", "90ad77d8057c43dab140b77361606927", 1);
-		//SdSrcInfo2Cli(0, msg2);               //0 发送设备信息
-		//SdSrcInfo2Cli(2, "0");             ///发2 表示发送结束 
-	}
-	//printf("leave GerSrcInfo\n");
-	//
-	while (!g_GerScrOK)
-	{
-		Sleep(1000);
-	}
-	std::vector<TreeNode>::iterator TreeIt = g_TreeNodeList.begin();
-	for (; TreeIt != g_TreeNodeList.end(); ++TreeIt)
-	{//发送根节点信息
-		string msg1 = TreeIt->treeCode;
-		
-		msg1 += ",0";
-		//CString str;
-		//str.Format(_T("%s"), msg1.c_str());
-		SdSrcInfo2Cli(3, (char*)msg1.c_str()); // 发3 表示发送根节点
+	CString UserInfo_path(".\\UserInfo.ini");
+	int debugs200 = GetPrivateProfileInt("UserInfo", "debugs200", 0, UserInfo_path);
+	
+	if (debugs200) {
+		ifstream readFile(".\\send1.txt");
+		string buf;
+		while (getline(readFile, buf)) {
+			char firstchar = buf[0];
+			string sub;
+			switch (firstchar)
+			{
+				case '3':
+					 sub = buf.substr(2, buf.length()-2);
+					SdSrcInfo2Cli(3, (char*)sub.c_str()); // 发3 表示发送根节点
+					cout << sub;
+					break;
+				case '0':
+					 sub = buf.substr(2, buf.length() - 2);
+					SdSrcInfo2Cli(0, (char*)sub.c_str()); 
+					cout << sub;
+					break;
+				case '1':
+					sub = buf.substr(2, buf.length() - 2);
+					SdSrcInfo2Cli(1, (char*)sub.c_str());
+					cout << sub;
+					break;
+				case '2':
+					sub = buf.substr(2, buf.length() - 2);
+					SdSrcInfo2Cli(2, (char*)sub.c_str());
+					cout << sub;
+					break;
 
-		
-	}
-	std::vector<DeviceGroup>::iterator Groupit = g_DeviceGroupList.begin();
-	for (; Groupit != g_DeviceGroupList.end(); ++Groupit)
-	{
-		//发送分组信息
-		char msg[1024];
-	//	//{
-	//	"indexCode": "b93e8685049b47ddbfe8b512c4c95608",
-	//		"treeCode" : "0",
-	//		"name" : "杭州市",
-	//		"parentIndexCode" : "-1"
-	//},
-	//{
-	//	"indexCode": "330108",
-	//	"treeCode" : "0",
-	//	"name" : "330108",
-	//	"parentIndexCode" : "b93e8685049b47ddbfe8b512c4c95608"
-	//},
-	//{
-	//	"indexCode": "190604011451064790",
-	//	"treeCode" : "0",
-	//	"name" : "车载设备",
-	//	"parentIndexCode" : "330108"
-	//},
-	//{
-	//	"indexCode": "efeef8d45acc4149addf13a5cf8368e9",
-	//	"treeCode" : "0",
-	//	"name" : "本地设备",
-	//	"parentIndexCode" : "330108"
-	//}
-		//这里发送分组份两种情况
-		//1,parentIndexCode == -1 ,说明父节点为根节点
-		//2,parentIndexCode != -1 ,则发送真正的父节点
-		if (Groupit->parentIndexCode == "-1")
-		{
-			sprintf(msg, "%s,%d,%s,%s", Groupit->treeCode.c_str(),\
-				1, Groupit->name.c_str(), Groupit->indexCode.c_str());
-		}
-		else
-		{
-			sprintf(msg, "%s,%d,%s,%s", Groupit->parentIndexCode.c_str(), \
-				1, Groupit->name.c_str(), Groupit->indexCode.c_str());
-		}
-		
-		
-		SdSrcInfo2Cli(1, msg);					//1 发送分组信息
-	}
+				default:
+					break;
+			}
 
-	std::vector<CameraInfo>::iterator Camerait = g_CameraInfoList.begin();
-	for (; Camerait != g_CameraInfoList.end(); ++Camerait)
-	{//发送摄像机信息
-		char msg[1024];
-		sprintf(msg, "%s,%d,%s,%s,%d", Camerait->unitIndexCode.c_str(), 1, \
-			Camerait->name.c_str(), Camerait->cameraIndexCode.c_str(), Camerait->status);
-		printf("SdSrcInfo2Cli0=%s\n", msg);
-		SdSrcInfo2Cli(0, msg);               //0 发送设备信息
+		}
+
+			  
+	}
+	else
+	{
+		ofstream OutFile("send.txt"); //利用构造函数创建txt文本，并且打开该文本
+
+									  //OutFile << "This is a Test12!";
+		{//公司测试
+		 //string msg1 = "0";
+		 //char msg[1024];
+		 //char msg2[1024];
+		 //msg1 += ",0";
+		 //SdSrcInfo2Cli(3, (char*)msg1.c_str()); // 发3 表示发送根节点
+		 //sprintf(msg, "%s,%d,%s,%s", "0", \
+		 		//	1, "分组1", "abc");
+//SdSrcInfo2Cli(1, msg);					//1 发送分组信息
+//sprintf(msg2, "%s,%d,%s,%s,%d","abc",1,"Camera_01", "90ad77d8057c43dab140b77361606927", 1);
+//SdSrcInfo2Cli(0, msg2);               //0 发送设备信息
+//SdSrcInfo2Cli(2, "0");             ///发2 表示发送结束 
+		}
+		//printf("leave GerSrcInfo\n");
+		//
+		while (!g_GerScrOK)
+		{
+			Sleep(1000);
+		}
+		std::vector<TreeNode>::iterator TreeIt = g_TreeNodeList.begin();
+		for (; TreeIt != g_TreeNodeList.end(); ++TreeIt)
+		{//发送根节点信息
+			string msg1 = TreeIt->treeCode;
+
+			msg1 += ",0";
+			//CString str;
+			//str.Format(_T("%s"), msg1.c_str());
+			SdSrcInfo2Cli(3, (char*)msg1.c_str()); // 发3 表示发送根节点
+			printf("SdSrcInfo2Cli3=%s\n", msg1.c_str());
+			OutFile << "3|" << msg1.c_str() << "\n";
+		}
+		std::vector<DeviceGroup>::iterator Groupit = g_DeviceGroupList.begin();
+		for (; Groupit != g_DeviceGroupList.end(); ++Groupit)
+		{
+			//发送分组信息
+			char msg[1024];
+			memset(msg, 0, 1024);
+			//	//{
+			//	"indexCode": "b93e8685049b47ddbfe8b512c4c95608",
+			//		"treeCode" : "0",
+			//		"name" : "杭州市",
+			//		"parentIndexCode" : "-1"
+			//},
+			//{
+			//	"indexCode": "330108",
+			//	"treeCode" : "0",
+			//	"name" : "330108",
+			//	"parentIndexCode" : "b93e8685049b47ddbfe8b512c4c95608"
+			//},
+			//{
+			//	"indexCode": "190604011451064790",
+			//	"treeCode" : "0",
+			//	"name" : "车载设备",
+			//	"parentIndexCode" : "330108"
+			//},
+			//{
+			//	"indexCode": "efeef8d45acc4149addf13a5cf8368e9",
+			//	"treeCode" : "0",
+			//	"name" : "本地设备",
+			//	"parentIndexCode" : "330108"
+			//}
+			//这里发送分组份两种情况
+			//1,parentIndexCode == -1 ,说明父节点为根节点
+			//2,parentIndexCode != -1 ,则发送真正的父节点
+			if (Groupit->parentIndexCode == "-1")
+			{
+				sprintf(msg, "%s,%d,%s,%s", Groupit->treeCode.c_str(), \
+					1, Groupit->name.c_str(), Groupit->indexCode.c_str());
+			}
+			else
+			{
+				sprintf(msg, "%s,%d,%s,%s", Groupit->parentIndexCode.c_str(), \
+					1, Groupit->name.c_str(), Groupit->indexCode.c_str());
+			}
+			OutFile << "1|" << msg << "\n";
+			printf("SdSrcInfo2Cli1=%s\n", msg);
+			SdSrcInfo2Cli(1, msg);					//1 发送分组信息
+		}
+
+		std::vector<CameraInfo>::iterator Camerait = g_CameraInfoList.begin();
+		for (; Camerait != g_CameraInfoList.end(); ++Camerait)
+		{//发送摄像机信息
+			char msg[1024];
+			memset(msg, 0, 1024);
+			sprintf(msg, "%s,%d,%s,%s,%d", Camerait->unitIndexCode.c_str(), 1, \
+				Camerait->name.c_str(), Camerait->cameraIndexCode.c_str(), Camerait->status);
+			printf("SdSrcInfo2Cli0=%s\n", msg);
+			OutFile << "0|" << msg << "\n";
+			SdSrcInfo2Cli(0, msg);               //0 发送设备信息
+		}
+
+		SdSrcInfo2Cli(2, "0");             ///发2 表示发送结束
+		OutFile << "2|" << "0" << "\n";
+		OutFile.close();
 	}
 	
-	SdSrcInfo2Cli(2, "0");             ///发2 表示发送结束
 	printf("leave  GerSrcInfo\n");
 }
 //YUV数据回调回调函数定义

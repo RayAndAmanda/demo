@@ -6,7 +6,7 @@
 #include "APIDemoDlg.h"
 #include "MyShowMsg.h"
 #include "DspLib.h"
-
+#include<fstream>
 char startpath[MAX_PATH] = { 0 };
 
 double YUV2RGB_CONVERT_MATRIX[3][3] =
@@ -241,7 +241,11 @@ BOOL CAPIDemoDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-
+	//ofstream OutFile("Test.txt"); //利用构造函数创建txt文本，并且打开该文本
+	//char dff[10] = "fdfd";
+	//OutFile << "This is a Test12!";  //把字符串内容"This is a Test!"，写入Test.txt文件
+	//OutFile << dff<< "\n";
+	//OutFile.close();            //关闭Test.txt文件
 	//CMenu* pSysMenu = GetSystemMenu(FALSE);
 	//if ( pSysMenu != NULL )
 	//{

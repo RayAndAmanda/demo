@@ -191,6 +191,19 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CSubDlgInit message handlers
+string UtfToGbk(const char* utf8)
+{
+	int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+	wchar_t* wstr = new wchar_t[len + 1];
+	memset(wstr, 0, len + 1);
+	MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wstr, len);
+	len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
+	char* str = new char[len + 1];
+	memset(str, 0, len + 1);
+	WideCharToMultiByte(CP_ACP, 0, wstr, -1, str, len, NULL, NULL);
+	if (wstr) delete[] wstr;
+	return str;
+}
 void DecodeTreeJson(std::string &strTrees)
 {
 	///获取所有树编码
@@ -219,12 +232,16 @@ void DecodeTreeJson(std::string &strTrees)
 		for (int i = 0; i < lists.size(); i++)
 		{
 			CString temp;
+			string utfbuf;
 			Json::Value &list = lists[i];
 			TreeNode treenode;
 			treenode.treeCode = list["treeCode"].asString();
 			
-			temp = list["treeName"].asCString();
-			treenode.treeName=Utf8toAnsi(temp.GetBuffer());
+			//temp = list["treeName"].asCString();
+			//treenode.treeName=Utf8toAnsi(temp.GetBuffer());
+			
+				utfbuf = list["treeName"].asString();
+				treenode.treeName = UtfToGbk(utfbuf.c_str());
 			g_TreeNodeList.push_back(treenode);
 		}
 	}
@@ -252,7 +269,7 @@ void DecodeCameraJson(std::string &strCameras,std::string &strTreeCode,int &tota
 	//
 	Json::Reader reader;                                    //解析json用Json::Reader
 	Json::Value value; //可以代表任意类型
-
+	
 	if (reader.parse(strCameras, value))
 	{
 		Json::Value &dataObject = value["data"];
@@ -264,21 +281,24 @@ void DecodeCameraJson(std::string &strCameras,std::string &strTreeCode,int &tota
 		//for (int i = 0; i < totalCamera; i++)
 		{
 			CString temp ;
-
+			string utfbuf;
 			Json::Value &list = lists[i];
 			CameraInfo camerainfo;
 			camerainfo.cameraIndexCode = list["cameraIndexCode"].asString();
 			
 			
-			/*temp = list["cameraTypeName"].asCString();
-			camerainfo.cameraTypeName= Utf8toAnsi(temp.GetBuffer());*/
-			camerainfo.cameraTypeName = list["cameraTypeName"].asString();
+			utfbuf = list["cameraTypeName"].asString();
+			camerainfo.cameraTypeName = UtfToGbk(utfbuf.c_str());
+			//camerainfo.cameraTypeName= Utf8toAnsi(temp.GetBuffer());
+			//camerainfo.cameraTypeName = list["cameraTypeName"].asString();
 
 
-			/*temp = list["name"].asCString();
-			camerainfo.name = Utf8toAnsi(temp.GetBuffer());*/
+			//temp = list["name"].asCString();
+			//camerainfo.name = Utf8toAnsi(temp.GetBuffer());
 
-			camerainfo.name = list["name"].asString();
+			utfbuf= list["name"].asString();
+			camerainfo.name = UtfToGbk(utfbuf.c_str());
+			//camerainfo.name = list["name"].asString();
 			camerainfo.cameraType= list["cameraType"].asInt();
 			camerainfo.treeCode = strTreeCode;
 			camerainfo.status= list["status"].asInt();
@@ -330,13 +350,16 @@ void DecodeDeviceGroupJson(std::string &strGroups,int& totalGroup)
 		Json::Value &lists = dataObject["list"];
 		for (int i = 0; i < lists.size(); i++)
 		{
+			string utfbuf;
 			CString temp;
 			Json::Value &list = lists[i];
 			DeviceGroup devicegroup;
 			devicegroup.indexCode = list["indexCode"].asString();
+			utfbuf = list["name"].asString();
+			
 			//temp = list["name"].asCString();
 			//devicegroup.name = Utf8toAnsi(temp.GetBuffer());
-			devicegroup.name = list["name"].asString();
+			devicegroup.name = UtfToGbk(utfbuf.c_str());
 			devicegroup.treeCode = list["treeCode"].asString();
 			devicegroup.parentIndexCode = list["parentIndexCode"].asString();
 			g_DeviceGroupList.push_back(devicegroup);
@@ -486,6 +509,8 @@ BOOL CSubDlgInit::OnInitDialog()
 	{
 		isInitialize = FALSE;
 	}
+
+	
 	//开黑窗 by ray
 	CString UserInfo_path(".\\UserInfo.ini");
 	int hideWindow = GetPrivateProfileInt("UserInfo", "hidewindow", 0, UserInfo_path);
@@ -515,6 +540,45 @@ BOOL CSubDlgInit::OnInitDialog()
 	printf("artemisIp:%s\n\n", myQuery.artemisIp.c_str());
 	printf("artemisPort:%d\n\n", myQuery.artemisPort);
 	//////
+
+	///
+	//ifstream readFile("D:\\MyCode\\杭州地铁6号线\\杭州地铁6号线\\VideoSDK_win32\\demo\\APIDemo\\send1.txt");
+	//string buf;
+	//while (getline(readFile, buf)) {
+	//	char firstchar = buf[0];
+	//	string sub;
+	//	switch (firstchar)
+	//	{
+	//	case '3':
+	//		sub = buf.substr(2, buf.length() - 2);
+	//		SdSrcInfo2Cli(3, (char*)sub.c_str()); // 发3 表示发送根节点
+	//		cout << sub;
+	//		break;
+	//	case '0':
+	//		sub = buf.substr(2, buf.length() - 2);
+	//		SdSrcInfo2Cli(0, (char*)sub.c_str());
+	//		cout << sub;
+	//		break;
+	//	case '1':
+	//		sub = buf.substr(2, buf.length() - 2);
+	//		SdSrcInfo2Cli(1, (char*)sub.c_str());
+	//		cout << sub;
+	//		break;
+	//	case '2':
+	//		sub = buf.substr(2, buf.length() - 2);
+	//		SdSrcInfo2Cli(2, (char*)sub.c_str());
+	//		cout << sub;
+	//		break;
+
+	//	default:
+	//		break;
+	//	}
+
+	//}
+
+
+	///
+	///////
 	//判断d:\exe2014\controlsvr.exe是否存在。
 	std::fstream _file;
 	_file.open("d:\\exe2014\\controlsvr.exe", ios::in);
